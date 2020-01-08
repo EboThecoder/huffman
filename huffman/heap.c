@@ -17,15 +17,15 @@ heap *create_heap()
     return new_heap;
 }
 
-unsigned get_parent_index(heap *heap, unsigned i)
+int get_parent_index(heap *heap, int i)
 {
     return i / 2;
 }
-unsigned get_left_index(heap *heap, unsigned i)
+int get_left_index(heap *heap, int i)
 {
     return 2 * i;
 }
-unsigned get_right_index(heap *heap, unsigned i)
+int get_right_index(heap *heap, int i)
 {
     return 2 * i + 1;
 }
@@ -44,23 +44,33 @@ void swap(void *u, void *v, size_t len)
 
 void print_heap(heap *heap)
 {
-    unsigned i;
+    int i;
     printf("\nheap size: %d\n", heap->size);
     for (i = 1; i <= heap->size; i++)
     {
-        if (i == heap->size)
-            printf("%c %d\n", *(unsigned char *)heap->nodes[i]->item, heap->nodes[i]->frequency);
+        if (*(unsigned char *)heap->nodes[i]->item == '\\')
+        {
+            if (i == heap->size)
+                printf("%c%c %d\n", *(unsigned char *)heap->nodes[i]->item, *((unsigned char *)heap->nodes[i]->item + 1), heap->nodes[i]->frequency);
+            else
+                printf("%c%c %d| ", *(unsigned char *)heap->nodes[i]->item , * ((unsigned char *)heap->nodes[i]->item + 1), heap->nodes[i]->frequency);
+        }
         else
-            printf("%c %d| ", *(unsigned char *)heap->nodes[i]->item, heap->nodes[i]->frequency);
+        {
+            if (i == heap->size)
+                printf("%c %d\n", *(unsigned char *)heap->nodes[i]->item, heap->nodes[i]->frequency);
+            else
+                printf("%c %d| ", *(unsigned char *)heap->nodes[i]->item, heap->nodes[i]->frequency);
+        }
     }
     printf("\n");
 }
 
-void min_heapify(heap *heap, unsigned i)
+void min_heapify(heap *heap, int i)
 {
-    unsigned smaller_index;
-    unsigned left_index = get_left_index(heap, i);
-    unsigned right_index = get_right_index(heap, i);
+    int smaller_index;
+    int left_index = get_left_index(heap, i);
+    int right_index = get_right_index(heap, i);
     if (left_index <= heap->size && heap->nodes[left_index]->frequency < heap->nodes[i]->frequency)
     {
         smaller_index = left_index;
@@ -84,13 +94,16 @@ void min_heapify(heap *heap, unsigned i)
 
 int is_in_heap(heap *heap, void *item)
 {
-    unsigned i;
-    if (*(char *)item == '*')
+    int i;
+    if (*(unsigned char *)item == '*')
         return 0;
     for (i = 1; i <= heap->size; i++)
     {
-        if (*(unsigned char *)heap->nodes[i]->item == *(unsigned char *)item)
-            return i;
+        if (*(unsigned char *)item == '\\' && *(unsigned char *)heap->nodes[i]->item == '\\')
+        {
+            if(*((unsigned char *)heap->nodes[i]->item + 1) == *((unsigned char *)item + 1)) return i;
+        }
+        else if (*(unsigned char *)heap->nodes[i]->item == *(unsigned char *)item) return i;
     }
     return 0;
 }
@@ -98,6 +111,7 @@ int is_in_heap(heap *heap, void *item)
 void enqueue(heap *heap, node *new_node)
 {
     int i;
+    //printf("%c\n", *(unsigned char*)new_node->item);
     i = is_in_heap(heap, new_node->item);
     if (heap->size >= MAX)
     {
@@ -112,8 +126,8 @@ void enqueue(heap *heap, node *new_node)
     {
         heap->size++;
         heap->nodes[heap->size] = new_node;
-        unsigned key_index = heap->size;
-        unsigned parent_index = get_parent_index(heap, heap->size);
+        int key_index = heap->size;
+        int parent_index = get_parent_index(heap, heap->size);
         while (parent_index >= 1 && heap->nodes[key_index]->frequency < heap->nodes[parent_index]->frequency)
         {
             swap(heap->nodes[key_index], heap->nodes[parent_index], sizeof(node));
@@ -121,7 +135,7 @@ void enqueue(heap *heap, node *new_node)
             parent_index = get_parent_index(heap, key_index);
         }
     }
-    //print_estado_atual(heap);
+    //print_heap(heap);
 }
 
 node *dequeue(heap *heap)

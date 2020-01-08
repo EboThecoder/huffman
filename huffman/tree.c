@@ -28,10 +28,46 @@ void print_tree(node *tree)
 {
     if (tree != NULL)
     {
-        printf("%c(", *(char *)tree->item);
-        print_tree(tree->left);
-        printf(")(");
-        print_tree(tree->right);
-        printf(")");
+        if (*(unsigned char *)tree->item == '\\')
+        {
+            printf("%c%c(", *(unsigned char *)tree->item , * ((unsigned char *)tree->item + 1));
+            print_tree(tree->left);
+            printf(")(");
+            print_tree(tree->right);
+            printf(")");
+        }
+        else
+        {
+            printf("%c(", *(unsigned char *)tree->item);
+            print_tree(tree->left);
+            printf(")(");
+            print_tree(tree->right);
+            printf(")");
+        }
+    }
+}
+
+void save_tree(node *tree, FILE *compacted_file)
+{
+    if (tree != NULL)
+    {
+        fprintf(compacted_file, "%c", *(unsigned char *)tree->item);
+        if (*(unsigned char *)tree->item == '\\') fprintf(compacted_file, "%c", *((unsigned char *)tree->item + 1));
+        save_tree(tree->left, compacted_file);
+        save_tree(tree->right, compacted_file);
+    }
+}
+
+void get_tree_size(node *tree, int *size)
+{
+    if (tree != NULL)
+    {
+        *size+= 1;
+        if (*(unsigned char *)tree->item == '\\') *size+= 1;
+        if (*(unsigned char *)tree->item == '*')
+        {
+            get_tree_size(tree->left, size);
+            get_tree_size(tree->right, size);
+        }
     }
 }

@@ -8,23 +8,23 @@
 
 typedef struct heap
 {
-    unsigned size;
+    int size;
     node *nodes[MAX];
 } heap;
 
 heap *create_heap();
 
-unsigned get_parent_index(heap *heap, unsigned i);
+int get_parent_index(heap *heap, int i);
 
-unsigned get_left_index(heap *heap, unsigned i);
+int get_left_index(heap *heap, int i);
 
-unsigned get_right_index(heap *heap, unsigned i);
+int get_right_index(heap *heap, int i);
 
 void swap(void *u, void *v, size_t len);
 
 void print_heap(heap *heap);
  
-void min_heapify(heap *heap, unsigned i);
+void min_heapify(heap *heap, int i);
 
 int is_in_heap(heap *heap, void *item);
 

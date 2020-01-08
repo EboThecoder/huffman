@@ -3,18 +3,13 @@
 #include <string.h>
 #include <math.h>
 
-#include "compactor.h"
 #include "tree.h"
 #include "heap.h"
-
-
+#include "hash.h"
+#include "compactor.h"
 
 int main()
 {
-    printf("bom dia\n");
-    node* tree = make_tree();
-    printf("na main.c\n");
-    printf("(");
-    print_tree(tree);
-    printf(")\n");
+    compact();
+    return 0;
 }
