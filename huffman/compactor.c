@@ -141,8 +141,7 @@ node *build_tree(unsigned char *str)
         }
         enqueue(heap, nodes[i]);
     }
-    print_heap(heap);
-
+    //print_heap(heap);
     node *left, *right, *parent;
     while (heap->size != 1)
     {
@@ -157,10 +156,13 @@ node *build_tree(unsigned char *str)
         parent->frequency = left->frequency + right->frequency;
         parent->left = left;
         parent->right = right;
-
+        /*
+        printf("(");
+        print_tree(parent);
+        printf(")\n");*/
         enqueue(heap, parent);
     }
-    /*printf("no compactor.c:\n");
+    /*
     printf("(");
     print_tree(heap->nodes[1]);
     printf(")\n");*/

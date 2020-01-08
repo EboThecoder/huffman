@@ -4,7 +4,7 @@
 #include "tree.h"
 
 #include <stdlib.h>
-#define MAX 10000
+#define MAX 100000
 
 typedef struct heap
 {

@@ -71,7 +71,7 @@ void min_heapify(heap *heap, int i)
     int smaller_index;
     int left_index = get_left_index(heap, i);
     int right_index = get_right_index(heap, i);
-    if (left_index <= heap->size && heap->nodes[left_index]->frequency < heap->nodes[i]->frequency)
+    if (left_index <= heap->size && heap->nodes[left_index]->frequency <= heap->nodes[i]->frequency)
     {
         smaller_index = left_index;
     }
@@ -79,15 +79,13 @@ void min_heapify(heap *heap, int i)
     {
         smaller_index = i;
     }
-    if (right_index <= heap->size && heap->nodes[right_index]->frequency < heap->nodes[smaller_index]->frequency)
+    if (right_index <= heap->size && heap->nodes[right_index]->frequency <= heap->nodes[smaller_index]->frequency)
     {
         smaller_index = right_index;
     }
     if (i != smaller_index)
     {
-        // printf("antes do swap - NODES[i]: %c NODES[smaller_index]: %c\n", *(char *)heap->nodes[i]->item, *(char *)heap->nodes[smaller_index]->item);
         swap(heap->nodes[i], heap->nodes[smaller_index], sizeof(node));
-        //  printf("depois do swap - NODES[i]: %c NODES[smaller_index]: %c\n", *(char *)heap->nodes[i]->item, *(char *)heap->nodes[smaller_index]->item);
         min_heapify(heap, smaller_index);
     }
 }
@@ -111,7 +109,6 @@ int is_in_heap(heap *heap, void *item)
 void enqueue(heap *heap, node *new_node)
 {
     int i;
-    //printf("%c\n", *(unsigned char*)new_node->item);
     i = is_in_heap(heap, new_node->item);
     if (heap->size >= MAX)
     {
@@ -128,7 +125,7 @@ void enqueue(heap *heap, node *new_node)
         heap->nodes[heap->size] = new_node;
         int key_index = heap->size;
         int parent_index = get_parent_index(heap, heap->size);
-        while (parent_index >= 1 && heap->nodes[key_index]->frequency < heap->nodes[parent_index]->frequency)
+        while (parent_index >= 1 && heap->nodes[key_index]->frequency <= heap->nodes[parent_index]->frequency)
         {
             swap(heap->nodes[key_index], heap->nodes[parent_index], sizeof(node));
             key_index = parent_index;
