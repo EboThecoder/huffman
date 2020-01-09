@@ -74,7 +74,26 @@ void build_map(node *tree, hash *map, int depth, bool *bits, int jump)
     }
 }
 
-void get(hash *hash, void *key)
+void print_map(hash* hash)
+{
+    printf("blz\n");
+    for(int i =0; i<256;i++)
+    {
+        if(hash->table[i]==NULL) printf(" %d (NULL)\n", i);
+        else
+        {
+            printf("%d | key %c | depth %d | frequency %d | bits ", i, *(unsigned char*)hash->table[i]->key, hash->table[i]->depth, hash->table[i]->frequency);
+            for(int j=0;j<hash->table[i]->depth; j++)
+            {
+                printf("%d", hash->table[i]->bits[j]);
+            }
+            printf("\n");
+        }
+    }
+    printf("\n");
+}
+
+hash_node* get(hash *hash, void *key)
 {
     int h = *(unsigned char *)key;
     while (hash->table[h] != NULL)
@@ -82,11 +101,13 @@ void get(hash *hash, void *key)
         if (*(unsigned char *)key == '\\' && *(unsigned char *)hash->table[h]->key == '\\')
         {
             if (*((unsigned char *)hash->table[h]->key + 1) == *((unsigned char *)key + 1))
-                print_bits(hash->table[h]->bits, hash->table[h]->depth);
+            {
+                return hash->table[h];
+            }
         }
         if (*(unsigned char *)hash->table[h]->key == *(unsigned char *)key)
         {
-            print_bits(hash->table[h]->bits, hash->table[h]->depth);
+            return hash->table[h];
         }
         h = (h + 1) % MAX_TABLE_SIZE;
     }

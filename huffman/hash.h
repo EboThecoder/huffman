@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdbool.h>
 #define MAX_TABLE_SIZE 256
-#define MAX_DEPTH 13
+#define MAX_DEPTH 30
 #define LEFT_JUMP 0
 #define RIGHT_JUMP 1
 #define START_JUMP -1
@@ -35,6 +35,8 @@ void put(hash *hash, void *key, int depth, int frequency, bool *bits);
 
 void build_map(node *tree, hash *map, int depth, bool *bits, int jump);
 
-void get(hash *hash, void *key);
+hash_node *get(hash *hash, void *key);
+
+void print_map(hash *hash);
 
 #endif

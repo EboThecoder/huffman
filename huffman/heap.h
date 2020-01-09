@@ -4,12 +4,13 @@
 #include "tree.h"
 
 #include <stdlib.h>
-#define MAX 100000
+#include <limits.h>
+
 
 typedef struct heap
 {
-    int size;
-    node *nodes[MAX];
+    int size; 
+    node *nodes[256];
 } heap;
 
 heap *create_heap();

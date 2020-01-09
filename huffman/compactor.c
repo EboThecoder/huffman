@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 #include "tree.h"
 #include "heap.h"
@@ -9,18 +10,9 @@
 
 #include "compactor.h"
 
-void read_file(unsigned char *str)
-{
-    int i=0;
-    FILE *file_to_compact = fopen("file_to_compact.txt", "r");
-    while(fscanf(file_to_compact, "%c", &str[i])!=EOF)
-    {
-        i++;
-    }
-    fclose(file_to_compact);
-}
 
-void get_trash_and_string_size(hash *map, int *trash_size, int *string_size)
+
+void get_trash_size(hash *map, int *trash_size, int *string_size)
 {
     for (int i = 0; i < 256; i++)
     {
@@ -33,9 +25,8 @@ void get_trash_and_string_size(hash *map, int *trash_size, int *string_size)
     if (*trash_size % 8 != 0)
     {
         *string_size += 1;
-        *trash_size = 8 - *trash_size % 8;
     }
-    else *trash_size = 0;
+    *trash_size = (8 - *trash_size % 8) % 8;
 }
 
 unsigned char set_bit(unsigned char c, int i)
@@ -50,23 +41,11 @@ int is_bit_i_set(unsigned char c, int i)
     return mask & c;
 }
 
-void zero_string(unsigned char *str, int size)
+int* allocate_counter()
 {
-    for (int i = 0; i < size; i++)
-    {
-        str[i] = 0;
-    }
-}
-
-void print_byte(unsigned char byte)
-{
-    int i;
-    for (i = 7; i >= 0; --i)
-    {
-        if(is_bit_i_set(byte, i)) printf("1");
-        else printf("0");
-    }
-    printf(" ");
+    int* cont = (int*)malloc(sizeof(int));
+    *cont = 0;
+    return cont;
 }
 
 void save_first_2_bytes(int *trash_size, int *tree_size, FILE *compacted_file)
@@ -80,67 +59,77 @@ void save_first_2_bytes(int *trash_size, int *tree_size, FILE *compacted_file)
     fprintf(compacted_file, "%c%c", ch1, ch2);
 }
 
-void save_file(hash *map, int string_size, unsigned char *str, FILE *compacted_file)
+void save_file(hash *map, FILE *compacted_file)
 {
-    unsigned char compacted[string_size];
-    zero_string(compacted, string_size);
-    int set_bit_index = 0, compacted_index= 0, str_index = 0, bits_index = 0;
-    for (str_index = 0; str_index < strlen(str); str_index++)
+    unsigned char ch, compacted_ch = 0;
+    int set_bit_index = 0, bits_index = 0;
+
+    char path_string[50];
+    FILE *path = fopen("path.txt", "r");
+    fscanf(path, "%s", path_string);
+    fclose(path);
+    printf("pegou o path\n");
+    FILE *file_to_compact = fopen(path_string, "r");
+    printf("abriu o file\n");
+    while (fscanf(file_to_compact, "%c", &ch) != EOF)
     {
-        for(bits_index=0 ; bits_index < map->table[str[str_index]]->depth; bits_index++)
+        //printf("iteração\n");
+        
+        for(bits_index=0 ; bits_index < map->table[ch]->depth; bits_index++)
         {
-            if(map->table[str[str_index]]->bits[bits_index])
+            if(map->table[ch]->bits[bits_index])
             {
-                printf("1");
-                compacted[compacted_index] = set_bit(compacted[compacted_index], set_bit_index);
+                //printf("1");
+                compacted_ch = set_bit(compacted_ch, set_bit_index);
             }
-            else printf("0");
+            else
+            {
+                //printf("0");
+            }
             if (set_bit_index == 7)
             {
-                compacted_index += 1;
-                printf(" ");
+                fprintf(compacted_file, "%c", compacted_ch);
+                compacted_ch = 0;
+                //printf(" ");
             }
             set_bit_index = (set_bit_index + 1) % 8;
         }
     }
-    printf("\n");
-    compacted[string_size] = '\0';
-    for(int i=0;i<string_size;i++)
-    {
-        printf("%d ", compacted[i]);
-    }
-    printf("\n");
-    //printf("%s\n", compacted);
-    fprintf(compacted_file, "%s", compacted);
+    printf("printa isso\n");
+    fclose(file_to_compact);
+    printf("closou\n");
 }
 
-node *build_tree(unsigned char *str)
+node *build_tree()
 {
     heap *heap = create_heap();
-    node *nodes[10000];
-    unsigned char escape_string[10000][2];
-    for(int i =0 ; i< strlen(str) ; i++)
+    
+    unsigned char ch;
+    char path_string[50];
+    FILE *path = fopen("path.txt", "r");
+    fscanf(path, "%s", path_string);
+    fclose(path);
+    FILE *file = fopen(path_string, "r");
+    while( fscanf(file, "%c", &ch) !=EOF)
     {
-        nodes[i] = create_node();
-        if(str[i] == '*')
+        node *node = create_node();
+        if(ch == '*')
         {
-            escape_string[i][0] = '\\';
-            escape_string[i][1] = '*';
-            nodes[i]->item = escape_string[i];
+            *(unsigned char*)node->item = '\\';
+            *((unsigned char *)node->item + 1) = '*';
         }
-        else if(str[i] == '\\')
+        else if(ch == '\\')
         {
-
-            escape_string[i][0] = '\\';
-            escape_string[i][1] = '\\';
-            nodes[i]->item = escape_string[i];
+            *(unsigned char *)node->item = '\\';
+            *((unsigned char *)node->item + 1) = '\\';
         }
         else
         {
-            nodes[i]->item = &str[i];
+            *(unsigned char*)node->item = ch;
         }
-        enqueue(heap, nodes[i]);
+        enqueue(heap, node);
     }
+    fclose(file);
     //print_heap(heap);
     node *left, *right, *parent;
     while (heap->size != 1)
@@ -151,8 +140,6 @@ node *build_tree(unsigned char *str)
         left = dequeue(heap);
         right = dequeue(heap);
         parent = create_node();
-        unsigned char ast = '*';
-        parent->item = &ast;
         parent->frequency = left->frequency + right->frequency;
         parent->left = left;
         parent->right = right;
@@ -171,29 +158,33 @@ node *build_tree(unsigned char *str)
 
 void compact()
 {
-    unsigned char str[10000];
-    read_file(str);
-
-    node *tree = build_tree(str);
+    printf("building tree..\n");
+    node *tree = build_tree();
+    printf("tree built :\n");
     print_tree(tree);
     printf("\n\n");
     hash *map = create_hash_table();
     bool bits[MAX_DEPTH];
+    printf("building hash table..\n");
     build_map(tree, map, -1, bits, START_JUMP);
-    
+    printf("hash table built:\n");
+    print_map(map);
 
     int *tree_size, *trash_size, *string_size;
-    int zero_1 = 0, zero_2 = 0, zero_3 = 0;
-    tree_size = &zero_1;
-    trash_size = &zero_2;
-    string_size = &zero_3;
+    tree_size = allocate_counter();
+    trash_size = allocate_counter();
+    string_size = allocate_counter();
+    printf("getting tree size..\n");
     get_tree_size(tree, tree_size);
-    get_trash_and_string_size(map, trash_size, string_size);
+    printf("getting trash size..\n");
+    get_trash_size(map, trash_size, string_size);
     printf("tree size: %d, trash size: %d, string size: %d\n\n", *tree_size, *trash_size, *string_size);
 
-    FILE* compacted_file = fopen("compacted_file.txt", "w");
+    FILE* compacted_file = fopen("compacted_file", "w");
+    printf("saving...\n");
     save_first_2_bytes(tree_size, trash_size, compacted_file);
     save_tree(tree, compacted_file);
-    save_file(map, *string_size, str, compacted_file);
+    save_file(map, compacted_file);
     fclose(compacted_file);
+    printf("compactation finished.\n");
 }

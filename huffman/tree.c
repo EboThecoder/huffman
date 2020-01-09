@@ -8,10 +8,12 @@
 node *create_node()
 {
     node *new_node = (node *)malloc(sizeof(node));
-
+    new_node->item = (void *)malloc(2 * sizeof(unsigned char *));
+    *(unsigned char*)new_node->item = '*';
     new_node->frequency = 1;
     new_node->left = NULL;
     new_node->right = NULL;
+    
     return new_node;
 }
 

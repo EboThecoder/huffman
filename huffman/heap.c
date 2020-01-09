@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
 
 #include "heap.h"
-
 
 heap *create_heap()
 {
     heap *new_heap = (heap *)malloc(sizeof(heap));
     new_heap->size = 0;
-    for (int i = 1; i < MAX; i++)
+    for (int i = 1; i < 256; i++)
     {
         new_heap->nodes[i] = create_node();
     }
@@ -110,7 +110,7 @@ void enqueue(heap *heap, node *new_node)
 {
     int i;
     i = is_in_heap(heap, new_node->item);
-    if (heap->size >= MAX)
+    if (heap->size >= __SIZE_MAX__)
     {
         //printf("Heap overflow");
     }

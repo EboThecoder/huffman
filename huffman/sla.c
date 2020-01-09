@@ -45,9 +45,19 @@ void swap(void *u, void *v, size_t len)
 
 int main()
 {
-    unsigned char a[2];
-    a[1] = 129;
-    a[2] = 0;
-    a[1] >>=1;
-    printf("%d %d\n", a[1], a[2]);
+    char ch, a[50];
+    scanf("%s", a);
+    FILE* file = fopen(a, "r");
+    while ((ch = getc(file)) != EOF)
+    {
+        printf("ch: %c\n", ch);
+    }
+    fclose(file);
+
+    FILE *file2 = fopen(a, "r");
+    while ((ch = getc(file2)) != EOF)
+    {
+        printf("ch: %c\n", ch);
+    }
+    fclose(file2);
 }
