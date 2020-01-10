@@ -93,8 +93,7 @@ void min_heapify(heap *heap, int i)
 int is_in_heap(heap *heap, void *item)
 {
     int i;
-    if (*(unsigned char *)item == '*')
-        return 0;
+    if (*(unsigned char *)item == '*') return 0;
     for (i = 1; i <= heap->size; i++)
     {
         if (*(unsigned char *)item == '\\' && *(unsigned char *)heap->nodes[i]->item == '\\')
@@ -118,6 +117,7 @@ void enqueue(heap *heap, node *new_node)
     {
         heap->nodes[i]->frequency++;
         min_heapify(heap, i);
+        free(new_node);
     }
     else
     {

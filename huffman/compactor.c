@@ -35,19 +35,6 @@ unsigned char set_bit(unsigned char c, int i)
     return mask | c;
 }
 
-int is_bit_i_set(unsigned char c, int i)
-{
-    unsigned char mask = 1 << i;
-    return mask & c;
-}
-
-int* allocate_counter()
-{
-    int* cont = (int*)malloc(sizeof(int));
-    *cont = 0;
-    return cont;
-}
-
 void save_first_2_bytes(int *trash_size, int *tree_size, FILE *compacted_file)
 {
     unsigned char ch1, ch2;
@@ -109,6 +96,7 @@ node *build_tree()
     FILE *path = fopen("path.txt", "r");
     fscanf(path, "%s", path_string);
     fclose(path);
+    printf("building heap..\n");
     FILE *file = fopen(path_string, "r");
     while( fscanf(file, "%c", &ch) !=EOF)
     {
@@ -130,35 +118,25 @@ node *build_tree()
         enqueue(heap, node);
     }
     fclose(file);
-    //print_heap(heap);
+    print_heap(heap);
+    printf("building tree..\n");
     node *left, *right, *parent;
     while (heap->size != 1)
     {
-        /*printf("estado da heap:\n");
-        print_heap(heap);
-        printf("\n");*/
         left = dequeue(heap);
         right = dequeue(heap);
         parent = create_node();
         parent->frequency = left->frequency + right->frequency;
         parent->left = left;
         parent->right = right;
-        /*
-        printf("(");
-        print_tree(parent);
-        printf(")\n");*/
         enqueue(heap, parent);
     }
-    /*
-    printf("(");
-    print_tree(heap->nodes[1]);
-    printf(")\n");*/
+    
     return heap->nodes[1];
 }
 
 void compact()
 {
-    printf("building tree..\n");
     node *tree = build_tree();
     printf("tree built :\n");
     print_tree(tree);

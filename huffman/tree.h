@@ -21,4 +21,6 @@ void save_tree(node *tree, FILE *compacted_file);
 
 void get_tree_size(node *tree, int *size);
 
+int *allocate_counter();
+
 #endif

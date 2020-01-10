@@ -8,7 +8,7 @@
 node *create_node()
 {
     node *new_node = (node *)malloc(sizeof(node));
-    new_node->item = (void *)malloc(2 * sizeof(unsigned char *));
+    new_node->item = (void *)malloc(2 * sizeof(unsigned char));
     *(unsigned char*)new_node->item = '*';
     new_node->frequency = 1;
     new_node->left = NULL;
@@ -72,4 +72,11 @@ void get_tree_size(node *tree, int *size)
             get_tree_size(tree->right, size);
         }
     }
+}
+
+int *allocate_counter()
+{
+    int *cont = (int *)malloc(sizeof(int));
+    *cont = 0;
+    return cont;
 }
