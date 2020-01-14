@@ -1,0 +1,124 @@
+#include "hash.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+hash *create_hash_table()
+{
+    hash *new_hash = (hash *)malloc(sizeof(hash));
+    int i;
+    for (i = 0; i < 256; i++)
+    {
+        new_hash->table[i] = NULL;
+    }
+    new_hash->size = 0;
+    return new_hash;
+}
+
+void print_bits(bool *bits, int size)
+{
+    for (int i = 1; i <= size; i++)
+    {
+        if (bits[i])
+            printf("1");
+        else
+            printf("0");
+    }
+    printf("\n");
+    printf("depth : %d\n", size);
+}
+
+void put(hash *hash, void *key, int depth, int frequency, bool *bits)
+{
+    if (hash->size >= 256)
+    {
+        //printf("hash table overflow\n");
+    }
+    else
+    {
+        int h;
+        if(*(unsigned char *)key != '\\') h = *(unsigned char *)key;
+        else h = *((unsigned char *)key + 1);
+        while (hash->table[h] != NULL)
+        {
+            h = (h + 1) % 256;
+        }
+
+        hash_node *new_hash_node = (hash_node *)malloc(sizeof(hash_node));
+        new_hash_node->key = key;
+        new_hash_node->depth = depth;
+        new_hash_node->frequency = frequency;
+        for (int i = 0; i < depth; i++)
+        {
+            new_hash_node->bits[i] = bits[i];
+        }
+        hash->table[h] = new_hash_node;
+        hash->size++;
+    }
+}
+
+void build_map(node *tree, hash *map, int depth, bool *bits, int jump, unsigned short* tree_size)
+{
+    tree_size+= 1;
+    if (jump != START_JUMP)
+        bits[depth] = jump;
+    if (*(unsigned char *)tree->item == '*')
+    {
+        build_map(tree->left, map, depth + 1, bits, LEFT_JUMP, tree_size);
+        build_map(tree->right, map, depth + 1, bits, RIGHT_JUMP, tree_size);
+    }
+    else
+    {
+        put(map, tree->item, depth + 1, tree->frequency, bits);
+    }
+}
+
+void print_map(hash* hash)
+{
+    printf("blz\n");
+    for(int i =0; i<256;i++)
+    {
+        if(hash->table[i]==NULL) printf(" %d (NULL)\n", i);
+        else
+        {
+            printf("%d | key %c | depth %d | frequency %d | bits ", i, *(unsigned char*)hash->table[i]->key, hash->table[i]->depth, hash->table[i]->frequency);
+            for(int j=0;j<hash->table[i]->depth; j++)
+            {
+                printf("%d", hash->table[i]->bits[j]);
+            }
+            printf("\n");
+        }
+    }
+    printf("\n");
+}
+
+void deallocate_hash(hash* hash)
+{
+    for(int i=0; i< 256 ;i++)
+    {
+        free(hash->table[i]);
+        hash->table[i] = NULL;
+    }
+    free(hash);
+}
+/*hash_node* get(hash *hash, void *key)
+{
+    int h = *(unsigned char *)key;
+    while (hash->table[h] != NULL)
+    {
+        if (*(unsigned char *)key == '\\' && *(unsigned char *)hash->table[h]->key == '\\')
+        {
+            if (*((unsigned char *)hash->table[h]->key + 1) == *((unsigned char *)key + 1))
+            {
+                return hash->table[h];
+            }
+        }
+        if (*(unsigned char *)hash->table[h]->key == *(unsigned char *)key)
+        {
+            return hash->table[h];
+        }
+        h = (h + 1) % 256;
+    }
+}*/
